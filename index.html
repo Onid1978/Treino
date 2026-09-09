@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treino</title>
+<meta name="theme-color" content="#0f120f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f120f;
+    --surface:#171b16;
+    --surface-2:#1e231d;
+    --line:#2b3128;
+    --text:#eef1e9;
+    --muted:#8a9184;
+    --accent:#d4ff3f;
+    --accent-dim:#9db82b;
+    --danger:#ff6b5b;
+    --radius:10px;
+    --font-display:'Oswald', sans-serif;
+    --font-body:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:#111;}
+
+  /* ---------- Auth screen ---------- */
+  #authScreen{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px;
+    text-align:center;
+    gap:28px;
+  }
+  #authScreen .mark{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(48px,12vw,88px);
+    letter-spacing:-1px;
+    line-height:0.9;
+    color:var(--text);
+  }
+  #authScreen .mark span{color:var(--accent);}
+  #authScreen p{color:var(--muted);max-width:340px;margin:0;font-size:15px;line-height:1.5;}
+  .g-btn{
+    display:flex;align-items:center;gap:10px;
+    background:var(--accent);
+    color:#0f120f;
+    border:none;
+    padding:14px 26px;
+    border-radius:999px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .g-btn:hover{transform:translateY(-1px);}
+  .g-btn:active{transform:translateY(0);}
+  .g-btn svg{width:18px;height:18px;}
+
+  /* ---------- App shell ---------- */
+  #app{display:none;min-height:100vh;}
+  #app.visible{display:block;}
+
+  header.top{
+    position:sticky;top:0;z-index:20;
+    background:rgba(15,18,15,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  header.top .brand{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:-0.5px;
+  }
+  header.top .brand span{color:var(--accent);}
+  .user-chip{display:flex;align-items:center;gap:10px;}
+  .user-chip img{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);}
+  .user-chip button{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:var(--font-body);font-size:13px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  }
+  .user-chip button:hover{color:var(--text);border-color:var(--muted);}
+
+  main{max-width:1080px;margin:0 auto;padding:20px;display:grid;gap:16px;}
+
+  /* stat row */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+  }
+  .stat{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+  }
+  .stat .num{
+    font-family:var(--font-display);
+    font-size:clamp(28px,6vw,38px);
+    font-weight:600;
+    color:var(--accent);
+    line-height:1;
+  }
+  .stat .label{color:var(--muted);font-size:12.5px;margin-top:6px;}
+
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;}
+  @media (max-width:820px){.grid-2{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+  .card h2{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:18px;
+    margin:0 0 16px 0;
+    letter-spacing:.2px;
+  }
+
+  /* log form */
+  form.log-form{display:grid;gap:12px;}
+  .field{display:grid;gap:6px;}
+  .field label{font-size:12.5px;color:var(--muted);}
+  .field input, .field select{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:11px 12px;
+    border-radius:8px;
+    font-family:var(--font-body);
+    font-size:14.5px;
+    width:100%;
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  #exerciseInput{position:relative;}
+  .suggestions{
+    position:absolute;top:100%;left:0;right:0;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 8px 8px;
+    max-height:180px;overflow-y:auto;
+    z-index:10;
+  }
+  .suggestions div{padding:9px 12px;font-size:14px;cursor:pointer;}
+  .suggestions div:hover{background:var(--line);}
+
+  button.primary{
+    background:var(--accent);
+    color:#0f120f;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  button.primary:hover{background:var(--accent-dim);}
+  button.primary:disabled{opacity:.5;cursor:default;}
+
+  /* exercise chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:7px 13px;
+    border-radius:999px;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .chip.active{background:var(--accent);color:#0f120f;border-color:var(--accent);font-weight:600;}
+  .chip:hover:not(.active){border-color:var(--muted);color:var(--text);}
+  .empty-note{color:var(--muted);font-size:13.5px;}
+
+  /* chart */
+  .chart-card canvas{max-height:260px;}
+  .chart-empty{color:var(--muted);font-size:14px;padding:40px 0;text-align:center;}
+
+  /* history */
+  .history-list{display:grid;gap:14px;}
+  .day-group .day-date{
+    font-family:var(--font-display);
+    font-size:14px;
+    color:var(--muted);
+    margin-bottom:8px;
+    letter-spacing:.3px;
+  }
+  .entry{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 14px;
+    margin-bottom:8px;
+    gap:10px;
+  }
+  .entry .ex-name{font-weight:600;font-size:14.5px;}
+  .entry .ex-detail{color:var(--muted);font-size:13px;margin-top:2px;}
+  .entry .ex-remove{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:4px;
+  }
+  .entry .ex-remove:hover{color:var(--danger);}
+
+  footer.hint{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 34px;}
+</style>
+</head>
+<body>
+
+  <!-- AUTH SCREEN -->
+  <div id="authScreen">
+    <div class="mark">TREI<span>NO</span></div>
+    <p>Regista os teus exercícios, séries e pesos. Acompanha a tua evolução ao longo do tempo, em qualquer dispositivo.</p>
+    <button class="g-btn" id="googleSignIn">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.6-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 19 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.7 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.1-2 13.7-5.4l-6.3-5.3C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.6 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.3 5.3C41.4 35.5 45 30.2 45 24c0-1.3-.1-2.6-.4-3.5z"/></svg>
+      Entrar com Google
+    </button>
+  </div>
+
+  <!-- APP -->
+  <div id="app">
+    <header class="top">
+      <div class="brand">TREI<span>NO</span></div>
+      <div class="user-chip">
+        <img id="userPhoto" src="" alt="">
+        <button id="signOutBtn">Sair</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="stats">
+        <div class="stat"><div class="num" id="statTotal">0</div><div class="label">treinos registados</div></div>
+        <div class="stat"><div class="num" id="statStreak">0</div><div class="label">dias seguidos</div></div>
+        <div class="stat"><div class="num" id="statExercises">0</div><div class="label">exercícios diferentes</div></div>
+      </section>
+
+      <div class="grid-2">
+        <section class="card">
+          <h2>Registar exercício</h2>
+          <form class="log-form" id="logForm">
+            <div class="field" id="exerciseInput">
+              <label for="exName">Exercício</label>
+              <input type="text" id="exName" placeholder="ex: Supino reto" autocomplete="off" required>
+              <div class="suggestions" id="exSuggestions" hidden></div>
+            </div>
+            <div class="row3">
+              <div class="field">
+                <label for="exSets">Séries</label>
+                <input type="number" id="exSets" min="1" placeholder="4" required>
+              </div>
+              <div class="field">
+                <label for="exReps">Reps</label>
+                <input type="number" id="exReps" min="1" placeholder="10" required>
+              </div>
+              <div class="field">
+                <label for="exWeight">Peso (kg)</label>
+                <input type="number" id="exWeight" min="0" step="0.5" placeholder="40" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="exDate">Data</label>
+              <input type="date" id="exDate" required>
+            </div>
+            <button type="submit" class="primary">Adicionar registo</button>
+          </form>
+        </section>
+
+        <section class="card chart-card">
+          <h2>Evolução</h2>
+          <div class="chips" id="exerciseChips"></div>
+          <div id="chartWrap" style="margin-top:16px;">
+            <canvas id="evolChart" hidden></canvas>
+            <div class="chart-empty" id="chartEmpty">Escolhe um exercício acima para ver a evolução do peso.</div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>Histórico</h2>
+        <div class="history-list" id="historyList">
+          <p class="empty-note">Ainda não tens registos. Adiciona o primeiro treino acima.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="hint">Treino · dados guardados na tua conta Google</footer>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc, query, where,
+  onSnapshot, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/+esm";
+
+// ⚠️ Substitui pelos dados do teu projeto Firebase (Firebase Console > Definições do projeto)
+const firebaseConfig = {
+  apiKey: "AIzaSyCk8L8gwxkBGvUYCI0JnEf-XoclS9bbba8",
+  authDomain: "treino-ginasio.firebaseapp.com",
+  projectId: "treino-ginasio",
+  storageBucket: "treino-ginasio.firebasestorage.app",
+  messagingSenderId: "896900702008",
+  appId: "1:896900702008:web:dac04c9a9fb5cfc6b7abcd"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+const authScreen = document.getElementById('authScreen');
+const appEl = document.getElementById('app');
+const userPhoto = document.getElementById('userPhoto');
+
+document.getElementById('googleSignIn').addEventListener('click', () => {
+  signInWithPopup(auth, provider).catch(err => alert('Erro ao entrar: ' + err.message));
+});
+document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+
+let currentUser = null;
+let entries = [];
+let selectedExercise = null;
+let chartInstance = null;
+
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  if (user) {
+    authScreen.style.display = 'none';
+    appEl.classList.add('visible');
+    userPhoto.src = user.photoURL || '';
+    listenEntries();
+  } else {
+    authScreen.style.display = 'flex';
+    appEl.classList.remove('visible');
+  }
+});
+
+function entriesCol() {
+  return collection(db, 'users', currentUser.uid, 'entries');
+}
+
+function listenEntries() {
+  const q = query(entriesCol(), orderBy('date', 'desc'));
+  onSnapshot(q, (snap) => {
+    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAll();
+  });
+}
+
+// ---- Form ----
+const logForm = document.getElementById('logForm');
+const exName = document.getElementById('exName');
+const exSuggestions = document.getElementById('exSuggestions');
+const exDate = document.getElementById('exDate');
+exDate.valueAsDate = new Date();
+
+exName.addEventListener('input', () => {
+  const val = exName.value.trim().toLowerCase();
+  if (!val) { exSuggestions.hidden = true; return; }
+  const names = [...new Set(entries.map(e => e.exercise))];
+  const matches = names.filter(n => n.toLowerCase().includes(val) && n.toLowerCase() !== val).slice(0, 6);
+  if (matches.length === 0) { exSuggestions.hidden = true; return; }
+  exSuggestions.innerHTML = matches.map(m => `<div>${escapeHtml(m)}</div>`).join('');
+  exSuggestions.hidden = false;
+});
+exSuggestions.addEventListener('click', (e) => {
+  if (e.target.tagName === 'DIV') {
+    exName.value = e.target.textContent;
+    exSuggestions.hidden = true;
+  }
+});
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('exerciseInput').contains(e.target)) exSuggestions.hidden = true;
+});
+
+logForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = logForm.querySelector('button');
+  btn.disabled = true;
+  try {
+    await addDoc(entriesCol(), {
+      exercise: exName.value.trim(),
+      sets: Number(document.getElementById('exSets').value),
+      reps: Number(document.getElementById('exReps').value),
+      weight: Number(document.getElementById('exWeight').value),
+      date: exDate.value,
+      createdAt: serverTimestamp()
+    });
+    logForm.reset();
+    exDate.valueAsDate = new Date();
+  } catch (err) {
+    alert('Erro ao guardar: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('historyList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('.ex-remove');
+  if (!btn) return;
+  if (!confirm('Remover este registo?')) return;
+  await deleteDoc(doc(db, 'users', currentUser.uid, 'entries', btn.dataset.id));
+});
+
+document.getElementById('exerciseChips').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  selectedExercise = chip.dataset.name === selectedExercise ? null : chip.dataset.name;
+  renderChips();
+  renderChart();
+});
+
+// ---- Render ----
+function renderAll() {
+  renderStats();
+  renderChips();
+  renderChart();
+  renderHistory();
+}
+
+function renderStats() {
+  document.getElementById('statTotal').textContent = entries.length;
+  document.getElementById('statExercises').textContent = new Set(entries.map(e => e.exercise)).size;
+  document.getElementById('statStreak').textContent = computeStreak();
+}
+
+function computeStreak() {
+  const days = new Set(entries.map(e => e.date));
+  let streak = 0;
+  let d = new Date();
+  while (true) {
+    const iso = d.toISOString().slice(0, 10);
+    if (days.has(iso)) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+function renderChips() {
+  const names = [...new Set(entries.map(e => e.exercise))].sort();
+  const wrap = document.getElementById('exerciseChips');
+  if (names.length === 0) {
+    wrap.innerHTML = '<span class="empty-note">Sem exercícios ainda.</span>';
+    return;
+  }
+  wrap.innerHTML = names.map(n =>
+    `<div class="chip ${n === selectedExercise ? 'active' : ''}" data-name="${escapeHtml(n)}">${escapeHtml(n)}</div>`
+  ).join('');
+}
+
+function renderChart() {
+  const canvas = document.getElementById('evolChart');
+  const empty = document.getElementById('chartEmpty');
+  if (!selectedExercise) {
+    canvas.hidden = true; empty.hidden = false;
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    return;
+  }
+  const data = entries
+    .filter(e => e.exercise === selectedExercise)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (data.length === 0) {
+    canvas.hidden = true; empty.hidden = false;
+    return;
+  }
+  canvas.hidden = false; empty.hidden = true;
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: data.map(d => formatDate(d.date)),
+      datasets: [{
+        label: selectedExercise,
+        data: data.map(d => d.weight),
+        borderColor: '#d4ff3f',
+        backgroundColor: 'rgba(212,255,63,0.12)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: 3,
+        pointBackgroundColor: '#d4ff3f'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2b3128' }, ticks: { color: '#8a9184' } },
+        y: { grid: { color: '#2b3128' }, ticks: { color: '#8a9184' }, title: { display: true, text: 'kg', color: '#8a9184' } }
+      }
+    }
+  });
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (entries.length === 0) {
+    list.innerHTML = '<p class="empty-note">Ainda não tens registos. Adiciona o primeiro treino acima.</p>';
+    return;
+  }
+  const byDate = {};
+  entries.forEach(e => {
+    (byDate[e.date] = byDate[e.date] || []).push(e);
+  });
+  const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+  list.innerHTML = dates.map(date => `
+    <div class="day-group">
+      <div class="day-date">${formatDate(date)}</div>
+      ${byDate[date].map(e => `
+        <div class="entry">
+          <div>
+            <div class="ex-name">${escapeHtml(e.exercise)}</div>
+            <div class="ex-detail">${e.sets}×${e.reps} · ${e.weight}kg</div>
+          </div>
+          <button class="ex-remove" data-id="${e.id}" title="Remover">×</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function formatDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+// ---- PWA ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
