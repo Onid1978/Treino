@@ -232,6 +232,90 @@
   .entry .ex-remove:hover{color:var(--danger);}
 
   footer.hint{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 34px;}
+
+  /* ---------- Auth extras ---------- */
+  .auth-divider{
+    display:flex;align-items:center;gap:12px;
+    color:var(--muted);font-size:12.5px;
+    width:100%;max-width:300px;
+  }
+  .auth-divider::before, .auth-divider::after{
+    content:'';flex:1;height:1px;background:var(--line);
+  }
+  .email-auth-form{
+    display:grid;gap:10px;
+    width:100%;max-width:300px;
+  }
+  .email-auth-form input{
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:8px;
+    font-family:var(--font-body);
+    font-size:14.5px;
+    width:100%;
+  }
+  .email-auth-form input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+  button.secondary{
+    background:var(--surface-2);
+    color:var(--text);
+    border:1px solid var(--line);
+    padding:12px 18px;
+    border-radius:8px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+  }
+  button.secondary:hover{border-color:var(--muted);}
+  .auth-links{display:flex;justify-content:space-between;font-size:12.5px;}
+  .auth-links a{color:var(--muted);text-decoration:none;}
+  .auth-links a:hover{color:var(--accent);}
+  .auth-msg{font-size:13px;color:var(--accent);margin:0;text-align:center;}
+  .auth-msg.error{color:var(--danger);}
+
+  /* ---------- Settings button ---------- */
+  #settingsBtn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    font-size:15px;width:30px;height:30px;border-radius:50%;cursor:pointer;
+  }
+  #settingsBtn:hover{color:var(--text);border-color:var(--muted);}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(10,12,10,0.75);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-box{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    width:100%;max-width:420px;
+    padding:22px;
+    max-height:88vh;overflow-y:auto;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .modal-head h2{font-family:var(--font-display);font-weight:500;font-size:20px;margin:0;}
+  .modal-close{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;line-height:1;}
+  .modal-close:hover{color:var(--text);}
+  .modal-section{padding:16px 0;border-top:1px solid var(--line);display:grid;gap:10px;}
+  .modal-section:first-of-type{border-top:none;padding-top:0;}
+  .modal-section h3{font-family:var(--font-display);font-weight:500;font-size:15px;margin:0;}
+  .danger-btn{
+    background:none;
+    border:1px solid var(--danger);
+    color:var(--danger);
+    padding:10px 16px;
+    border-radius:8px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .danger-btn:hover{background:var(--danger);color:#0f120f;}
 </style>
 </head>
 <body>
@@ -244,6 +328,18 @@
       <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.6-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 19 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.7 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.1-2 13.7-5.4l-6.3-5.3C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.6 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.3 5.3C41.4 35.5 45 30.2 45 24c0-1.3-.1-2.6-.4-3.5z"/></svg>
       Entrar com Google
     </button>
+
+    <div class="auth-divider"><span>ou</span></div>
+
+    <form id="emailAuthForm" class="email-auth-form">
+      <input type="text" id="authUsername" placeholder="Nome de utilizador" autocomplete="username" required>
+      <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit" class="secondary" id="emailAuthSubmit">Entrar</button>
+      <div class="auth-links">
+        <a href="#" id="toggleAuthMode">Criar conta nova</a>
+      </div>
+      <p class="auth-msg" id="authMsg" hidden></p>
+    </form>
   </div>
 
   <!-- APP -->
@@ -252,6 +348,7 @@
       <div class="brand">TREI<span>NO</span></div>
       <div class="user-chip">
         <img id="userPhoto" src="" alt="">
+        <button id="settingsBtn" title="Definições">⚙</button>
         <button id="signOutBtn">Sair</button>
       </div>
     </header>
@@ -336,14 +433,46 @@
     <footer class="hint">Treino · dados guardados na tua conta Google</footer>
   </div>
 
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>Definições</h2>
+        <button id="closeSettings" class="modal-close">×</button>
+      </div>
+
+      <div class="modal-section" id="changePasswordSection">
+        <h3>Mudar password</h3>
+        <div class="field">
+          <label for="curPassword">Password atual</label>
+          <input type="password" id="curPassword" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label for="newPassword">Nova password</label>
+          <input type="password" id="newPassword" autocomplete="new-password">
+        </div>
+        <button class="primary" id="changePasswordBtn">Guardar nova password</button>
+        <p class="auth-msg" id="pwMsg" hidden></p>
+      </div>
+
+      <div class="modal-section danger-section">
+        <h3>Apagar todos os dados</h3>
+        <p class="empty-note">Remove permanentemente todos os treinos registados nesta conta. Não pode ser desfeito.</p>
+        <button class="danger-btn" id="resetDataBtn">Apagar todos os registos</button>
+      </div>
+    </div>
+  </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail,
+  updatePassword, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, deleteDoc, doc, query, where,
-  onSnapshot, orderBy, serverTimestamp
+  onSnapshot, orderBy, serverTimestamp, getDocs, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import Chart from "https://esm.sh/chart.js@4.4.4/auto";
 
@@ -370,6 +499,62 @@ document.getElementById('googleSignIn').addEventListener('click', () => {
   signInWithPopup(auth, provider).catch(err => alert('Erro ao entrar: ' + err.message));
 });
 document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+
+// ---- Email/password auth ----
+let authMode = 'login';
+const emailAuthForm = document.getElementById('emailAuthForm');
+const authMsg = document.getElementById('authMsg');
+const emailAuthSubmit = document.getElementById('emailAuthSubmit');
+const toggleAuthMode = document.getElementById('toggleAuthMode');
+
+function showAuthMsg(text, isError) {
+  authMsg.textContent = text;
+  authMsg.classList.toggle('error', !!isError);
+  authMsg.hidden = false;
+}
+
+toggleAuthMode.addEventListener('click', (e) => {
+  e.preventDefault();
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  emailAuthSubmit.textContent = authMode === 'login' ? 'Entrar' : 'Criar conta';
+  toggleAuthMode.textContent = authMode === 'login' ? 'Criar conta nova' : 'Já tenho conta';
+  authMsg.hidden = true;
+});
+
+emailAuthForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const rawUsername = document.getElementById('authUsername').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const username = rawUsername.toLowerCase().replace(/[^a-z0-9_.-]/g, '');
+  if (username.length < 3) { showAuthMsg('Nome de utilizador tem de ter pelo menos 3 caracteres (letras, números).', true); return; }
+  const fakeEmail = username + '@treino-ginasio.app';
+  emailAuthSubmit.disabled = true;
+  authMsg.hidden = true;
+  try {
+    if (authMode === 'login') {
+      await signInWithEmailAndPassword(auth, fakeEmail, password);
+    } else {
+      await createUserWithEmailAndPassword(auth, fakeEmail, password);
+    }
+  } catch (err) {
+    showAuthMsg(traduzErroAuth(err.code), true);
+  } finally {
+    emailAuthSubmit.disabled = false;
+  }
+});
+
+function traduzErroAuth(code) {
+  const map = {
+    'auth/invalid-email': 'Nome de utilizador inválido.',
+    'auth/user-not-found': 'Não existe conta com este nome de utilizador.',
+    'auth/wrong-password': 'Password incorreta.',
+    'auth/invalid-credential': 'Utilizador ou password incorretos.',
+    'auth/email-already-in-use': 'Esse nome de utilizador já está em uso.',
+    'auth/weak-password': 'A password tem de ter pelo menos 6 caracteres.',
+    'auth/too-many-requests': 'Demasiadas tentativas. Tenta mais tarde.'
+  };
+  return map[code] || 'Ocorreu um erro. Tenta novamente.';
+}
 
 let currentUser = null;
 let entries = [];
@@ -608,6 +793,58 @@ function formatDate(iso) {
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
+
+// ---- Settings modal ----
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  const isGoogleOnly = currentUser && currentUser.providerData.every(p => p.providerId === 'google.com');
+  document.getElementById('changePasswordSection').hidden = isGoogleOnly;
+  settingsModal.hidden = false;
+});
+document.getElementById('closeSettings').addEventListener('click', () => settingsModal.hidden = true);
+settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.hidden = true; });
+
+const pwMsg = document.getElementById('pwMsg');
+function showPwMsg(text, isError) {
+  pwMsg.textContent = text;
+  pwMsg.classList.toggle('error', !!isError);
+  pwMsg.hidden = false;
+}
+
+document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+  const curPassword = document.getElementById('curPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  if (!curPassword || !newPassword) { showPwMsg('Preenche os dois campos.', true); return; }
+  if (newPassword.length < 6) { showPwMsg('A nova password tem de ter pelo menos 6 caracteres.', true); return; }
+  try {
+    const cred = EmailAuthProvider.credential(currentUser.email, curPassword);
+    await reauthenticateWithCredential(currentUser, cred);
+    await updatePassword(currentUser, newPassword);
+    document.getElementById('curPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    showPwMsg('Password alterada com sucesso.', false);
+  } catch (err) {
+    showPwMsg(traduzErroAuth(err.code), true);
+  }
+});
+
+document.getElementById('resetDataBtn').addEventListener('click', async () => {
+  if (!confirm('Isto vai apagar TODOS os teus registos de treino permanentemente. Continuar?')) return;
+  if (!confirm('Tens a certeza? Esta ação não pode ser desfeita.')) return;
+  const btn = document.getElementById('resetDataBtn');
+  btn.disabled = true;
+  try {
+    const snap = await getDocs(entriesCol());
+    const batch = writeBatch(db);
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    settingsModal.hidden = true;
+  } catch (err) {
+    alert('Erro ao apagar dados: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 // ---- PWA ----
 if ('serviceWorker' in navigator) {
