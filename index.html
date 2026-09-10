@@ -272,20 +272,41 @@
               <input type="text" id="exName" placeholder="ex: Supino reto" autocomplete="off" required>
               <div class="suggestions" id="exSuggestions" hidden></div>
             </div>
-            <div class="row3">
+            <div class="chips" id="typeToggle">
+              <div class="chip active" data-type="forca">Musculação</div>
+              <div class="chip" data-type="cardio">Cardio</div>
+            </div>
+
+            <div class="row3" id="forcaFields">
               <div class="field">
                 <label for="exSets">Séries</label>
-                <input type="number" id="exSets" min="1" placeholder="4" required>
+                <input type="number" id="exSets" min="1" placeholder="4">
               </div>
               <div class="field">
                 <label for="exReps">Reps</label>
-                <input type="number" id="exReps" min="1" placeholder="10" required>
+                <input type="number" id="exReps" min="1" placeholder="10">
               </div>
               <div class="field">
                 <label for="exWeight">Peso (kg)</label>
-                <input type="number" id="exWeight" min="0" step="0.5" placeholder="40" required>
+                <input type="number" id="exWeight" min="0" step="0.5" placeholder="40">
               </div>
             </div>
+
+            <div class="row3" id="cardioFields" hidden>
+              <div class="field">
+                <label for="exTime">Tempo (min)</label>
+                <input type="number" id="exTime" min="0" step="1" placeholder="30">
+              </div>
+              <div class="field">
+                <label for="exSpeed">Velocidade (km/h)</label>
+                <input type="number" id="exSpeed" min="0" step="0.1" placeholder="8.5">
+              </div>
+              <div class="field">
+                <label for="exIncline">Inclinação (%)</label>
+                <input type="number" id="exIncline" min="0" step="0.5" placeholder="2">
+              </div>
+            </div>
+
             <div class="field">
               <label for="exDate">Data</label>
               <input type="date" id="exDate" required>
@@ -387,6 +408,18 @@ const exSuggestions = document.getElementById('exSuggestions');
 const exDate = document.getElementById('exDate');
 exDate.valueAsDate = new Date();
 
+let logType = 'forca';
+const forcaFields = document.getElementById('forcaFields');
+const cardioFields = document.getElementById('cardioFields');
+document.getElementById('typeToggle').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  logType = chip.dataset.type;
+  document.querySelectorAll('#typeToggle .chip').forEach(c => c.classList.toggle('active', c === chip));
+  forcaFields.hidden = logType !== 'forca';
+  cardioFields.hidden = logType !== 'cardio';
+});
+
 exName.addEventListener('input', () => {
   const val = exName.value.trim().toLowerCase();
   if (!val) { exSuggestions.hidden = true; return; }
@@ -411,16 +444,28 @@ logForm.addEventListener('submit', async (e) => {
   const btn = logForm.querySelector('button');
   btn.disabled = true;
   try {
-    await addDoc(entriesCol(), {
+    const payload = {
       exercise: exName.value.trim(),
-      sets: Number(document.getElementById('exSets').value),
-      reps: Number(document.getElementById('exReps').value),
-      weight: Number(document.getElementById('exWeight').value),
+      type: logType,
       date: exDate.value,
       createdAt: serverTimestamp()
-    });
+    };
+    if (logType === 'forca') {
+      payload.sets = Number(document.getElementById('exSets').value) || 0;
+      payload.reps = Number(document.getElementById('exReps').value) || 0;
+      payload.weight = Number(document.getElementById('exWeight').value) || 0;
+    } else {
+      payload.time = Number(document.getElementById('exTime').value) || 0;
+      payload.speed = Number(document.getElementById('exSpeed').value) || 0;
+      payload.incline = Number(document.getElementById('exIncline').value) || 0;
+    }
+    await addDoc(entriesCol(), payload);
     logForm.reset();
     exDate.valueAsDate = new Date();
+    logType = 'forca';
+    document.querySelectorAll('#typeToggle .chip').forEach(c => c.classList.toggle('active', c.dataset.type === 'forca'));
+    forcaFields.hidden = false;
+    cardioFields.hidden = true;
   } catch (err) {
     alert('Erro ao guardar: ' + err.message);
   } finally {
@@ -497,6 +542,9 @@ function renderChart() {
     return;
   }
   canvas.hidden = false; empty.hidden = true;
+  const isCardio = data[data.length - 1].type === 'cardio';
+  const metricKey = isCardio ? 'speed' : 'weight';
+  const metricLabel = isCardio ? 'km/h' : 'kg';
   if (chartInstance) chartInstance.destroy();
   chartInstance = new Chart(canvas, {
     type: 'line',
@@ -504,7 +552,7 @@ function renderChart() {
       labels: data.map(d => formatDate(d.date)),
       datasets: [{
         label: selectedExercise,
-        data: data.map(d => d.weight),
+        data: data.map(d => d[metricKey]),
         borderColor: '#d4ff3f',
         backgroundColor: 'rgba(212,255,63,0.12)',
         fill: true,
@@ -518,7 +566,7 @@ function renderChart() {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: '#2b3128' }, ticks: { color: '#8a9184' } },
-        y: { grid: { color: '#2b3128' }, ticks: { color: '#8a9184' }, title: { display: true, text: 'kg', color: '#8a9184' } }
+        y: { grid: { color: '#2b3128' }, ticks: { color: '#8a9184' }, title: { display: true, text: metricLabel, color: '#8a9184' } }
       }
     }
   });
@@ -542,7 +590,9 @@ function renderHistory() {
         <div class="entry">
           <div>
             <div class="ex-name">${escapeHtml(e.exercise)}</div>
-            <div class="ex-detail">${e.sets}×${e.reps} · ${e.weight}kg</div>
+            <div class="ex-detail">${e.type === 'cardio'
+              ? `${e.time}min · ${e.speed}km/h · ${e.incline}% incl.`
+              : `${e.sets}×${e.reps} · ${e.weight}kg`}</div>
           </div>
           <button class="ex-remove" data-id="${e.id}" title="Remover">×</button>
         </div>
